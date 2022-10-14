@@ -1,8 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {useParams} from 'react-router-dom';
 
-function Add(props) {
-    const [inputField, setInputField] = useState({name:'',email:'',phone:''});
-    const submitForm = () =>{
+function Edit(props) {
+    const param = useParams();
+    const [inputField, setInputField] = useState({name:'',email:'',phone:'',user_id:''});
+     useEffect(() => {
+       const fetchUser = async () => {
+         const res = await fetch(
+           "http://localhost/api/api.php?action=Details&user_id=" + param.id
+         );
+         const data = await res.json();
+         console.log(data);
+         if (data.status == 1) {
+          setInputField({
+            name: data.user.name,
+            email: data.user.email,
+            phone: data.user.phone,
+            user_id: data.user.user_id,
+          });
+         }
+       };
+       fetchUser();
+     }, []);
+    const updateForm = () =>{
         if (inputField.name == '') {
             alert('Please Enter Name');
             return false;
@@ -16,30 +36,33 @@ function Add(props) {
               return false;
             }
             
-            fetch("http://localhost/api/api.php?action=Add", {
+            fetch("http://localhost/api/api.php?action=Update", {
               method: "POST",
-              headers:{
-                'Accept-Encoding':'gzip;q=1.0,compress;q=0.5',
-              'Content-Type':'application/json',
-              'Accept':'application/json',
+              headers: {
+                "Accept-Encoding": "gzip;q=1.0,compress;q=0.5",
+                "Content-Type": "application/json",
+                Accept: "application/json",
               },
               body: JSON.stringify({
                 name: inputField.name,
                 email: inputField.email,
                 phone: inputField.phone,
+                user_id: inputField.user_id,
               }),
-            }).then((response) => response.json()).then((res) => {
-                if(res.status == 1){
-             setInputField({ name: "", email: "", phone: "" });
-             alert('Records has been added successfully');
+            })
+              .then((response) => response.json())
+              .then((res) => {
+                if (res.status == 1) {
+                 
+                  alert("Records has been updated successfully");
                 } else {
-                    alert('Something went wrong, try again later');
+                  alert("Something went wrong, try again later");
                 }
-            });
+              });
     }
   return (
     <div>
-      <h1>This Is Add</h1>
+      <h1>This Is Update</h1>
       <div className="form">
         <form>
           <div className="form-group">
@@ -82,11 +105,11 @@ function Add(props) {
             <button
               type="button"
               onClick={() => {
-                submitForm();
+                updateForm();
               }}
               className="btn btn-primary"
             >
-              Add
+              Update
             </button>
           </div>
         </form>
@@ -95,4 +118,4 @@ function Add(props) {
   );
 }
 
-export default Add;
+export default Edit;
